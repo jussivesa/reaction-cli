@@ -33,10 +33,10 @@ export function test(yargs) {
       cmd = 'SERVER_TEST_REPORTER="dot" ' + cmd;
     }
     if (subCommands[1] === 'unit') {
-      cmd += ' --once --headless --driver-package dispatch:mocha';
+      cmd += ' --settings test_settings.json --once --headless --driver-package dispatch:mocha';
       Log.info('Running unit tests command:');
     } else {
-      cmd += ' --once --full-app --headless --driver-package dispatch:mocha';
+      cmd += ' --settings test_settings.json  --once --full-app --headless --driver-package dispatch:mocha';
       Log.info('Running full-app test command:');
     }
     if (onlyHasPort) {
