@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
-import { exec, rm } from 'shelljs';
-import { Log, installModules } from '../utils';
+import { exec } from 'shelljs';
+import { Log } from '../utils';
 
 
 function resetMeteor() {
@@ -17,9 +17,7 @@ function resetMeteor() {
 
 function resetNpm() {
   Log.info('\nDeleting node_modules...');
-  rm('-rf', 'node_modules');
-  Log.info('\nReinstalling node_modules...');
-  installModules();
+  exec('find . -name \"node_modules\" -exec rm -rf \'{}\' +');
   Log.success('Done!\n');
 }
 

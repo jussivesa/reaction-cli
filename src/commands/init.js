@@ -28,7 +28,7 @@ export function init(argv) {
 
   const { blue } = Log;
 
-  Log.info('\nTo start your Reaction instance, just run: \n');
+  Log.info('\nTo start Reaction run:\n');
   Log.info(blue.bold(` cd ${dirName}`));
   Log.info(blue.bold(' reaction\n'));
 }

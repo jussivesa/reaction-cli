@@ -76,27 +76,29 @@ function getImportPaths(baseDirPath) {
     const registryImport = baseDirPath + plugin + '/register.js';
     const packageDotJson = baseDirPath + plugin + '/package.json';
 
-    // run npm link if package.json exists
-    if (exists(packageDotJson)) {
-      packagePaths.push(`${baseDirPath}${plugin}`);
-    } else {
-      // import the client files if they exist
-      if (exists(clientImport)) {
-        clientImportPaths.push(getImportPath(clientImport.replace('/index.js', '')));
-      }
-
-      // import the server files if they exist
-      if (exists(serverImport)) {
-        serverImportPaths.push(getImportPath(serverImport.replace('/index.js', '')));
-      }
-
-      // import plugin registry files
-      if (exists(registryImport)) {
-        registryImportPaths.push(getImportPath(registryImport));
-      }
+    // import the client files if they exist
+    if (exists(clientImport)) {
+      clientImportPaths.push(getImportPath(clientImport.replace('/index.js', '')));
     }
 
+    // import the server files if they exist
+    if (exists(serverImport)) {
+      serverImportPaths.push(getImportPath(serverImport.replace('/index.js', '')));
+    }
 
+    // import plugin registry files
+    if (exists(registryImport)) {
+      registryImportPaths.push(getImportPath(registryImport));
+    }
+
+    // run npm install if package.json exists
+    if (exists(packageDotJson)) {
+      if (exec(`cd ${baseDirPath}${plugin} && npm link`).code !== 0) {
+        Log.error(`Failed to install npm dependencies for plugin: ${plugin}`);
+        process.exit(1);
+      }
+      packagePaths.push(`${baseDirPath}${plugin}`);
+    }
   });
 
   return {
@@ -133,31 +135,16 @@ export default function () {
     custom.registry
   );
   const packageImports = [].concat(core.packages, included.packages, custom.packages).join(' ');
-  const devDependencies = ['babel-preset-meteor',
-    'babel-preset-react',
-    'babel-preset-stage-2',
-    'babel-plugin-lodash',
-    'babel-plugin-module-resolver',
-    'babel-preset-es2015',
-    'babel-eslint',
-    'eslint',
-    'eslint-plugin-react'].join(' ');
 
   const appRoot = path.resolve('.').split('.meteor')[0];
-
-  if (exec('meteor npm init --yes').code !== 0) {
-    Log.error('Failed to create default package.json. Run: npm init');
-    process.exit(1);
-  }
-
   Log.info('Installing Babel presets...\n');
-  if (exec(`meteor npm --save-dev i ${devDependencies} `).code !== 0) {
-    Log.error('Failed to install babel presets');
+  if (exec('npm i babel-preset-meteor babel-preset-react babel-preset-stage-2 babel-runtime').code !== 0) {
+    // Log.error(`Failed to install npm dependencies for plugin: ${plugin}`);
     process.exit(1);
   }
-  Log.info('Installing dependencies...\n');
-  if (exec(`meteor npm i ${packageImports} --quiet --silent`).code !== 0) {
-    Log.error('Failed to install npm dependencies for plugins');
+  Log.info('Linking dependencies...\n');
+  if (exec(`npm link ${packageImports}`).code !== 0) {
+    // Log.error(`Failed to install npm dependencies for plugin: ${plugin}`);
     process.exit(1);
   }
   // create import files on client and server and write import statements
